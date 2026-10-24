@@ -1,19 +1,25 @@
-module inv_mod_97(
+module inv_mod_97 #(
+  parameter int W = 7,
+  parameter logic [W-1:0] P = 97
+)(
   input logic clk, 
   input logic rst,
-  input logic [6:0] a,
+  input logic [W-1:0] a,
   output logic valid,
   output logic inv_exist,
-  output logic [6:0] result
+  output logic [W-1:0] result
 );
-  exp_mod_97 em97(
+  // Fermat's little theorem: a^-1 = a^(p-2) mod p
+  localparam logic [W-1:0] EXP = P - 2;
+
+  exp_mod_97 #(.W(W), .P(P)) em97(
     .clk(clk),
     .rst(rst),
     .base(a),
-    .exp(7'd95),
+    .exp(EXP),
     .valid(valid),
     .result(result)
   );
 
-  assign inv_exist = a != 7'd0;
+  assign inv_exist = a != '0;
 endmodule
