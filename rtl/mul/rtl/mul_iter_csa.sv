@@ -13,10 +13,13 @@ module mul_iter_csa #(
     $fatal(1, "mul_iter_csa: W=%0d must be >= 2", W);
   end
 
+  localparam int CNT_W = $clog2(W+1);
+
   // Registers
   logic [2*W-1:0] a_q, a_d, b_q, b_d;
   logic [2*W-1:0] s_q, s_d, c_q, c_d;
   logic [2*W-1:0] p_q, p_d;
+  logic [CNT_W-1:0] cnt_q, cnt_d;
 
   logic [2*W-1:0] pp, csa_sum, csa_carry, final_sum, a_shl, b_shr;
 
@@ -31,6 +34,7 @@ module mul_iter_csa #(
       a_q <= (2*W)'(0);
       b_q <= (2*W)'(0);
       p_q <= (2*W)'(0);
+      cnt_q <= CNT_W'(0);
     end
     else begin
       state_q <= state_d;
@@ -39,6 +43,7 @@ module mul_iter_csa #(
       a_q <= a_d;
       b_q <= b_d;
       p_q <= p_d;
+      cnt_q <= cnt_d;
     end
   end
 
@@ -49,6 +54,7 @@ module mul_iter_csa #(
     a_d = a_q;
     b_d = b_q;
     p_d = p_q;
+    cnt_d = cnt_q;
 
     case (state_q)
       IDLE: 
@@ -59,11 +65,12 @@ module mul_iter_csa #(
             b_d = {W'(0), b};
             s_d = (2*W)'(0);
             c_d = (2*W)'(0);
+            cnt_d = CNT_W'(0);
           end
           else state_d = IDLE;
         end
       RUN:
-        if (~|b_q) begin
+        if (cnt_q == CNT_W'(W)) begin
           state_d = DONE;
           p_d = final_sum;
         end
@@ -73,6 +80,7 @@ module mul_iter_csa #(
           a_d = a_shl;
           b_d = b_shr;
           state_d = RUN;
+          cnt_d = cnt_q + CNT_W'(1);
         end
       DONE:
         state_d = IDLE;
