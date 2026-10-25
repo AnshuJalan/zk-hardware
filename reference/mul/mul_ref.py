@@ -1,4 +1,4 @@
-"""Golden model for the unsigned W x W -> 2W multipliers in parametrized_primitives/."""
+"""Golden model for the unsigned W x W -> 2W multipliers in rtl/mul/rtl/."""
 
 
 def mul_ref(a: int, b: int, w: int) -> int:

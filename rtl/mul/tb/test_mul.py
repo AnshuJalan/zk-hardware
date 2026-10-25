@@ -1,4 +1,4 @@
-"""Runs every multiplier configuration with cocotb and prints a summary table (`python3 tb/mul/test_mul.py [filter]` or `pytest tb/mul/test_mul.py`)."""
+"""Runs every multiplier configuration with cocotb and prints a summary table (`python3 rtl/mul/tb/test_mul.py [filter]` or `pytest rtl/mul/tb/test_mul.py`)."""
 
 import json
 import os
@@ -11,23 +11,24 @@ import pytest
 from cocotb_tools.runner import get_results, get_runner
 
 TB_DIR = Path(__file__).resolve().parent
-REPO = TB_DIR.parents[1]
-RTL = REPO / "parametrized_primitives"
+REPO = TB_DIR.parents[2]
+RTL = TB_DIR.parent / "rtl"
+COMMON = REPO / "rtl" / "common"
 BUILD_ROOT = TB_DIR / "sim_build"
 SIM = os.environ.get("SIM", "verilator")
 SEED = int(os.environ.get("MUL_SEED", "20261025"))
 
 # The cocotb runner forwards sys.path to the simulator as PYTHONPATH.
-for path in (TB_DIR, REPO / "reference"):
+for path in (TB_DIR, REPO / "reference" / "mul"):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
 SOURCES = {
-    "mul_behav": ["mul_behav.sv"],
-    "mul_comb": ["csa_3_2.sv", "mul_comb.sv"],
-    "mul_iter_csa": ["mul_iter_csa.sv"],
-    "mul_digit_serial": ["csa_3_2.sv", "mul_digit_serial.sv"],
-    "mul_pipe": ["csa_3_2.sv", "mul_pipe.sv"],
+    "mul_behav": [RTL / "mul_behav.sv"],
+    "mul_comb": [COMMON / "csa_3_2.sv", RTL / "mul_comb.sv"],
+    "mul_iter_csa": [RTL / "mul_iter_csa.sv"],
+    "mul_digit_serial": [COMMON / "csa_3_2.sv", RTL / "mul_digit_serial.sv"],
+    "mul_pipe": [COMMON / "csa_3_2.sv", RTL / "mul_pipe.sv"],
 }
 
 TESTS = {
@@ -78,7 +79,7 @@ def run(cfg):
     runner = get_runner(SIM)
     t0 = time.monotonic()
     runner.build(
-        sources=[RTL / f for f in SOURCES[cfg.top]],
+        sources=SOURCES[cfg.top],
         hdl_toplevel=cfg.top,
         parameters=cfg.params,
         build_dir=build_dir,

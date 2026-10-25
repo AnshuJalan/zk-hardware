@@ -1,4 +1,4 @@
-"""cocotb tests that check every multiplier in parametrized_primitives/ against reference/mul_ref.py."""
+"""cocotb tests that check every multiplier in rtl/mul/rtl/ against reference/mul/mul_ref.py."""
 
 import itertools
 import json
