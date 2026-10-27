@@ -60,6 +60,11 @@ module synth_top #(
       .clk, .rst_n, .start(go_q), .a(a_q), .b(b_q), .done(dut_flag), .p(dut_p)
     );
   end
+  else if (DUT == "mul_digit_serial_pad") begin : gen_dut
+    mul_digit_serial_pad #(.W(W), .D(D)) u_dut (
+      .clk, .rst_n, .start(go_q), .a(a_q), .b(b_q), .done(dut_flag), .p(dut_p)
+    );
+  end
   else if (DUT == "mul_pipe") begin : gen_dut
     mul_pipe #(.W(W), .STAGES(STAGES)) u_dut (
       .clk, .rst_n, .in_valid(go_q), .a(a_q), .b(b_q), .out_valid(dut_flag), .p(dut_p)

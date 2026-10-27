@@ -28,6 +28,7 @@ SOURCES = {
     "mul_comb": [COMMON / "csa_3_2.sv", RTL / "mul_comb.sv"],
     "mul_iter_csa": [RTL / "mul_iter_csa.sv"],
     "mul_digit_serial": [COMMON / "csa_3_2.sv", RTL / "mul_digit_serial.sv"],
+    "mul_digit_serial_pad": [COMMON / "csa_3_2.sv", RTL / "mul_digit_serial_pad.sv"],
     "mul_pipe": [COMMON / "csa_3_2.sv", RTL / "mul_pipe.sv"],
 }
 
@@ -36,6 +37,7 @@ TESTS = {
     "mul_comb": "test_comb",
     "mul_iter_csa": "test_seq",
     "mul_digit_serial": "test_seq",
+    "mul_digit_serial_pad": "test_seq",
     "mul_pipe": "test_pipe",
 }
 
@@ -62,8 +64,10 @@ def make_configs():
             Config("mul_comb", {"W": w}, mode, n_random),
             Config("mul_iter_csa", {"W": w}, mode, n_random),
         ]
-        configs += [Config("mul_digit_serial", {"W": w, "D": d}, mode, n_random) for d in (1, 2, 4)]
-        configs += [Config("mul_pipe", {"W": w, "STAGES": s}, mode, n_random) for s in (1, 2, 4, 8)]
+        configs += [Config("mul_digit_serial", {"W": w, "D": d}, mode, n_random) for d in (1, 2, 4, 8)]
+        # D=5 and D=6 do not divide W, so they run on the padded variant.
+        configs += [Config("mul_digit_serial_pad", {"W": w, "D": d}, mode, n_random) for d in (5, 6)]
+        configs += [Config("mul_pipe", {"W": w, "STAGES": s}, mode, n_random) for s in (1, 2, 4, 8, 16) if w % s == 0]
     return configs
 
 

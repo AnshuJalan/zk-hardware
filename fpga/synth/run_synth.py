@@ -42,11 +42,16 @@ class Run:
 
 RUNS = [
     Run("iter_csa", "mul_iter_csa", "mul_iter_csa", [f"{MUL}/mul_iter_csa.sv"], sim_cfg="mul_iter_csa_W64"),
-    Run("digit_serial_d4", "mul_digit_serial D=4", "mul_digit_serial", [CSA, f"{MUL}/mul_digit_serial.sv"],
-        {"D": 4}, sim_cfg="mul_digit_serial_W64_D4"),
+    *(Run(f"digit_serial_d{d}", f"mul_digit_serial D={d}", "mul_digit_serial",
+          [CSA, f"{MUL}/mul_digit_serial.sv"], {"D": d}, sim_cfg=f"mul_digit_serial_W64_D{d}")
+      for d in (4, 8)),
+    *(Run(f"digit_serial_pad_d{d}", f"mul_digit_serial_pad D={d}", "mul_digit_serial_pad",
+          [CSA, f"{MUL}/mul_digit_serial_pad.sv"], {"D": d}, sim_cfg=f"mul_digit_serial_pad_W64_D{d}")
+      for d in (5, 6)),
     Run("comb", "mul_comb", "mul_comb", [CSA, f"{MUL}/mul_comb.sv"]),
-    Run("pipe_s4", "mul_pipe STAGES=4", "mul_pipe", [CSA, f"{MUL}/mul_pipe.sv"],
-        {"STAGES": 4}, sim_cfg="mul_pipe_W64_STAGES4"),
+    *(Run(f"pipe_s{s}", f"mul_pipe STAGES={s}", "mul_pipe", [CSA, f"{MUL}/mul_pipe.sv"],
+          {"STAGES": s}, sim_cfg=f"mul_pipe_W64_STAGES{s}")
+      for s in (4, 8, 16)),
     Run("behav_nodsp", "mul_behav (-nodsp)", "mul_behav", [f"{MUL}/mul_behav.sv"]),
     Run("behav_dsp", "mul_behav (DSP)", "mul_behav", [f"{MUL}/mul_behav.sv"], nodsp=False),
 ]
@@ -194,7 +199,8 @@ def main(args):
         table,
         "\n".join([
             "- Latency cycles come from the cocotb runs in rtl/mul/tb (cycle start or in_valid is high to the cycle done or out_valid is high).",
-            "- mul_iter_csa and mul_digit_serial issue one result every latency + 1 cycles, and mul_pipe issues one result per cycle.",
+            "- mul_iter_csa, mul_digit_serial and mul_digit_serial_pad issue one result every latency + 1 cycles, and mul_pipe issues one result per cycle.",
+            "- mul_digit_serial_pad zero-extends b to a multiple of D bits so that D need not divide W. Its latency is ceil(W/D) + 2 cycles.",
             "- A latency range means the latency depends on the operands, and latency ns and throughput then use the worst case.",
             "- \\* A combinational DUT has no internal registers. Its result is captured on the next clock edge, so it costs one period, the same as mul_pipe STAGES=1.",
             "- Critical path endpoints are nextpnr's cell.pin names. The script names each FF cell after the register bit it drives so the names stay readable.",

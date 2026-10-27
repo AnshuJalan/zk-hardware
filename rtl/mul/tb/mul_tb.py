@@ -93,7 +93,7 @@ async def test_comb(dut):
 
 @cocotb.test()
 async def test_seq(dut):
-    """Checks the start/done/p contract of mul_iter_csa and mul_digit_serial.
+    """Checks the start/done/p contract of mul_iter_csa, mul_digit_serial and mul_digit_serial_pad.
 
     Each pair is started in a cycle where the DUT is idle. While the multiply is in
     flight the test drives random start, a and b, which the DUT must ignore. It checks
@@ -102,7 +102,7 @@ async def test_seq(dut):
     """
     w = len(dut.a)
     d = int(os.environ.get("MUL_D", "0"))
-    expected_latency = w // d + 2 if d else None
+    expected_latency = -(-w // d) + 2 if d else None
     timeout = 4 * w + 16
     pairs, rng = stimulus(w)
     chk = Checker(dut, w)
